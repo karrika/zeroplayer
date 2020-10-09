@@ -1,0 +1,12 @@
+In order to install the requirements to run this you can install the packages.
+
+
+sudo apt update
+sudo apt install < requirements.txt
+
+after that you also need to run
+
+pip3 install mplayer.py
+
+
+

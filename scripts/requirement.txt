@@ -1,6 +1,4 @@
 mplayer
-python3-pil
+python3-alsaaudio
 python3-pil.imagetk
-python3-pip
 python3-pymediainfo
-python3-tk

@@ -12,15 +12,15 @@ from mplayer import Player
 import tkinter.font
 import math
 RunningOnPi = os.uname()[4].startswith('arm')
+UseOmxplayer = False
 if RunningOnPi:
     import RPi.GPIO as GPIO
     import alsaaudio
+    UseOmxplayer = True
 
 Player.introspect()
-'''player = Player(args=('-x', '320', '-y', '190', '-geometry', '122:164', '-noborder', '-ontop'))'''
-player = Player()
 global fullscreen
-fullscreen = 1
+fullscreen = 0
 
 TITLELO=4
 TITLEHI=12
@@ -32,8 +32,13 @@ GAPTIME=0.2
 
 class ZeroPlayer(Frame):
     
-    def __init__(self):
+    def __init__(self, windowed = False):
         super().__init__()
+        self.windowed = windowed
+        if windowed:
+            self.player = Player(args=('-xy', '800', '-geometry', '1100:100', '-noborder', '-ontop'))
+        else:
+            self.player = Player()
         self.mp3_search = "/media/pi/*/*/*/*.mp*"
         self.m3u_def    = "ALLTracks"
         self.m3u_dir    = "/media/pi/MUSIC/"
@@ -351,23 +356,26 @@ class ZeroPlayer(Frame):
         if self.status == IDLE:
             return
         if os.path.exists(self.track):
-            if 'mp3' in self.track or not RunningOnPi:
-                player.stop()
+            if 'mp3' in self.track or not RunningOnPi or UseOmxplayer == False:
+                self.player.stop()
                 if self.mp4playing:
                     os.killpg(self.p.pid, signal.SIGTERM)
-                player.loadfile(self.track)
+                self.player.loadfile(self.track)
             else:
-                player.stop()
+                self.player.stop()
                 if self.mp4playing:
                     os.killpg(self.p.pid, signal.SIGTERM)
-                rpistr = "omxplayer --win 0,49,320,240 " + '"' + self.track + '"'
+                if self.windowed:
+                    rpistr = "omxplayer --win 800,90,1840,700 " + '"' + self.track + '"'
+                else:
+                    rpistr = "omxplayer --win 0,49,320,240 " + '"' + self.track + '"'
                 self.p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
                 self.mp4playing = True
             self.start = time.time()
         else:
             return
         self.play_stopped = False
-        player.time_pos = 0
+        self.player.time_pos = 0
         self.show_remining_time()
         self.change_start_button()
         self.Play_track2()
@@ -378,9 +386,9 @@ class ZeroPlayer(Frame):
             if self.mp4playing:
                 os.killpg(self.p.pid, signal.SIGTERM)
                 self.mp4playing = False
-                player.stop()
+                self.player.stop()
             else:
-                player.stop()
+                self.player.stop()
             self.show_remining_time()
             self.change_start_button()
             self.play_stopped = True
@@ -429,7 +437,7 @@ class ZeroPlayer(Frame):
             self.timer = time.time()
             if self.status == PLAYING:
                 self.status = IDLE
-                player.stop()
+                self.player.stop()
             if os.path.exists(self.m3u_dir + self.m3u_def + ".m3u"):
                 os.remove(self.m3u_dir + self.m3u_def + ".m3u")
             self.Tracks = glob.glob(self.mp3_search)
@@ -441,9 +449,6 @@ class ZeroPlayer(Frame):
                 self.counter5 = 0
                 self.tunes = []
                 self.RELOAD1_List()
-               
-            else:
-                self.Disp_artist_name.config(text =" NO TRACKS FOUND !")
             
     def RELOAD1_List(self):       
          z,self.drive_name1,self.drive_name2,self.drive_name,self.artist_name,self.album_name,self.track_name  = self.Tracks[self.counter5].split('/')
@@ -464,6 +469,7 @@ class ZeroPlayer(Frame):
 def main():
     root = Tk()
     root.title("ZeroPlayer")
+    print('Screen', root.winfo_screenwidth(), root.winfo_screenheight())
     if root.winfo_screenwidth() == 800 and root.winfo_screenheight() == 480 and fullscreen == 1:
         root.wm_attributes('-fullscreen','true')
     elif root.winfo_screenwidth() == 320 and root.winfo_screenheight() == 240 and fullscreen == 1:
@@ -472,7 +478,7 @@ def main():
         root.wm_attributes('-fullscreen','true')
     elif root.winfo_screenwidth() == 480 and root.winfo_screenheight() == 800 and fullscreen == 1:
         root.wm_attributes('-fullscreen','true')
-    ex = ZeroPlayer()
+    ex = ZeroPlayer(root.winfo_screenwidth() != 320)
     root.geometry("320x240")
     root.mainloop() 
 

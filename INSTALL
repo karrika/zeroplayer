@@ -1,12 +1,76 @@
-In order to install the requirements to run this you can install the packages.
+GENERAL
 
+The zeroplayer is a small media player that can play mp3 music and mp4 videos on a small Raspberry Pi computer.
+I wrote it as I had a PiZero and an extra 320 by 240 pixel TFT display hanging around.
 
-sudo apt update
-sudo apt install < requirements.txt
+OPERATING SYSTEM
 
-after that you also need to run
+The starting point is the "Raspberry Pi OS (32-bit) with desktop".
+I chose the Debian Buster version released on 2020-08-20.
 
-pip3 install mplayer.py
+As we need X11 for displaying the widgets I would go for the desktop version.
 
+INSTALL FONTS
 
+We need three fonts that are not usually found on the Raspberry Pi OS.
+
+To get and install these fonts by running this script:
+
+cd scripts
+./get_fonts.sh
+
+INSTALL PACKAGES
+
+cd scripts
+./install_packages.sh
+
+MUSIC AND VIDEOS
+
+The zeroconf player looks for the media in the folder /media/pi/MUSIC
+
+You could format your USB stick and give it the name MUSIC to be compatible with zeroplayer.
+
+It will look for a playlist file called ALLTracks.m3u that should be at the top directory of the USB stick.
+eg. /media/pi/MUSIC/ALLTracks.m3u
+
+The content of the playlist is the files listed in the format performer/album/track.
+
+/media/pi/MUSIC/Albert Lee/Album/RocknRollMan.mp3
+/media/pi/MUSIC/Jellyroll/Album/Jellyroll Jump.mp3
+/media/pi/MUSIC/Postmodern Jukebox/Album/All About That Bass.mp4
+
+RUNNING
+
+You can start the player manually.
+
+cd zeroplayer/src
+./zeroplayer.py
+
+CONTROLS
+
+There is 3 ways to control the player.
+
+1) Touch screen or mouse
+- click anywhere on the top bar for Play or Stop
+- click on right side of the screen for Next Track
+- click on left side of the screen for Previous Track
+
+2) GPIO buttons.
+The fbtft screens usually have 4 buttons below the screen.
+- press leftmost button for Previous Track
+- press 2nd button for Play or Stop
+- press 3rd button for Next Track
+
+3) Keyboard
+- press 'a' for Previous Track
+- press 'w' for Start
+- press 's' for Stop
+- press 'd' for Next Track
+- press 'q' for Quit
+
+AUTOSTART AT BOOT
+
+Add a line to the end of the file /etc/xdg/lxsession/LXDG-pi/autostart
+
+@/home/pi/zeroplayer/src/zeroplayer
 

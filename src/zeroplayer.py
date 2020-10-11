@@ -11,6 +11,7 @@ from PIL import ImageTk, Image
 from mplayer import Player
 import tkinter.font
 import math
+import getpass
 RunningOnPi = os.uname()[4].startswith('arm')
 UseOmxplayer = False
 if RunningOnPi:
@@ -35,13 +36,14 @@ class ZeroPlayer(Frame):
     def __init__(self, windowed = False):
         super().__init__()
         self.windowed = windowed
+        self.user = getpass.getuser()
         if windowed:
             self.player = Player(args=('-xy', '800', '-geometry', '1100:100', '-noborder', '-ontop'))
         else:
             self.player = Player()
-        self.mp3_search = "/media/pi/*/*/*/*.mp*"
+        self.mp3_search = "/media/" + self.user + "/*/*/*/*.mp*"
         self.m3u_def    = "ALLTracks"
-        self.m3u_dir    = "/media/pi/MUSIC/"
+        self.m3u_dir    = "/media/" + self.user + "/MUSIC/"
         self.mp4playing     = False
         self.volume         = 100
         self.stop_start     = 22
@@ -111,9 +113,8 @@ class ZeroPlayer(Frame):
 
         # check default .m3u exists, if not then make it
         if not os.path.exists(self.que_dir):
-            self.RELOAD_List()
-        else:
-            self.init_tunes()
+            self.Create_Playlist()
+        self.init_tunes()
         self.Show_Track()
        
     def change_start_button(self):
@@ -135,10 +136,10 @@ class ZeroPlayer(Frame):
     def init_tunes(self):
         Tracks = []
         with open(self.que_dir,"r") as textobj:
-           line = textobj.readline()
-           while line:
-              Tracks.append(line.strip())
-              line = textobj.readline()
+            line = textobj.readline()
+            while line:
+               Tracks.append(line.strip())
+               line = textobj.readline()
         self.tunes = []
         for counter in range (0,len(Tracks)):
             z,self.drive_name1,self.drive_name2,self.drive_name,self.artist_name,self.album_name,self.track_name  = Tracks[counter].split('/')
@@ -433,39 +434,19 @@ class ZeroPlayer(Frame):
         else:
             self.status = IDLE
  
-    def RELOAD_List(self):
-            self.timer = time.time()
-            if self.status == PLAYING:
-                self.status = IDLE
-                self.player.stop()
-            if os.path.exists(self.m3u_dir + self.m3u_def + ".m3u"):
-                os.remove(self.m3u_dir + self.m3u_def + ".m3u")
-            self.Tracks = glob.glob(self.mp3_search)
-            if len (self.Tracks) > 0 :
-                with open(self.m3u_dir + self.m3u_def + ".m3u", 'w') as f:
-                    for item in self.Tracks:
-                        f.write("%s\n" % item)
-            if len (self.Tracks) > 0 :
-                self.counter5 = 0
-                self.tunes = []
-                self.RELOAD1_List()
-            
-    def RELOAD1_List(self):       
-         z,self.drive_name1,self.drive_name2,self.drive_name,self.artist_name,self.album_name,self.track_name  = self.Tracks[self.counter5].split('/')
-         self.tunes.append(self.artist_name + "^" + self.album_name + "^" + self.track_name + "^" + self.drive_name + "^" + self.drive_name1 + "^" + self.drive_name2)
-         self.counter5 +=1
-         if self.counter5 < len(self.Tracks) and len(self.Tracks) > 0:
-             self.after(1,self.RELOAD1_List)
-         else:    
-             self.RELOAD2_List()
+    def Create_Playlist(self):
+        self.timer = time.time()
+        if self.status == PLAYING:
+            self.status = IDLE
+            self.player.stop()
+        if os.path.exists(self.m3u_dir + self.m3u_def + ".m3u"):
+            os.remove(self.m3u_dir + self.m3u_def + ".m3u")
+        self.Tracks = glob.glob(self.mp3_search)
+        if len (self.Tracks) > 0 :
+            with open(self.m3u_dir + self.m3u_def + ".m3u", 'w') as f:
+                for item in sorted(self.Tracks):
+                    f.write("%s\n" % item)
 
-    def RELOAD2_List(self):
-        self.counter5 = 0
-        self.track_no = 0
-        self.m3us = glob.glob(self.m3u_dir + "*.m3u")
-        self.m3us.insert(0,self.m3u_dir + self.m3u_def + ".m3u")
-        self.que_dir   = self.m3u_dir + self.m3u_def + ".m3u"
-            
 def main():
     root = Tk()
     root.title("ZeroPlayer")

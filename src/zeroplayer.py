@@ -38,7 +38,7 @@ class ZeroPlayer(Frame):
         self.windowed = windowed
         self.user = getpass.getuser()
         if windowed:
-            self.player = Player(args=('-xy', '800', '-geometry', '1100:100', '-noborder', '-ontop'))
+            self.player = Player(args=('-zoom', '-xy', '320', '-geometry', '320:240', '-noborder', '-ontop'))
         else:
             self.player = Player()
         if self.usbmusic_exists():

@@ -38,7 +38,7 @@ class ZeroPlayer(Frame):
         self.windowed = windowed
         self.user = getpass.getuser()
         if windowed:
-            self.player = Player(args=('-zoom', '-xy', '320', '-geometry', '320:240', '-noborder', '-ontop'))
+            self.player = Player(args=('-zoom', '-xy', '320', '-geometry', '+100+190', '-noborder', '-ontop'))
         else:
             self.player = Player()
         if self.usbmusic_exists():
@@ -364,7 +364,6 @@ class ZeroPlayer(Frame):
     def Play_track(self):
         if self.status == IDLE:
             return
-        print('karri ' + self.track)
         if os.path.exists(self.track):
             if 'mp3' in self.track or not RunningOnPi or UseOmxplayer == False:
                 self.player.stop()
@@ -469,7 +468,7 @@ def main():
     elif root.winfo_screenwidth() == 480 and root.winfo_screenheight() == 800 and fullscreen == 1:
         root.wm_attributes('-fullscreen','true')
     ex = ZeroPlayer(root.winfo_screenwidth() != 320)
-    root.geometry("320x240")
+    root.geometry("320x240+100+100")
     root.mainloop() 
 
 if __name__ == '__main__':

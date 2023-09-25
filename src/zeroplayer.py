@@ -14,14 +14,15 @@ import math
 import getpass
 RunningOnPi = os.uname()[4].startswith('arm')
 UseOmxplayer = False
+global fullscreen
+fullscreen = 0
 if RunningOnPi:
     import RPi.GPIO as GPIO
     import alsaaudio
     UseOmxplayer = True
+    fullscreen = 1
 
 Player.introspect()
-global fullscreen
-fullscreen = 0
 
 TITLELO=4
 TITLEHI=12
@@ -468,7 +469,10 @@ def main():
     elif root.winfo_screenwidth() == 480 and root.winfo_screenheight() == 800 and fullscreen == 1:
         root.wm_attributes('-fullscreen','true')
     ex = ZeroPlayer(root.winfo_screenwidth() != 320)
-    root.geometry("320x240+100+100")
+    if root.winfo_screenwidth() == 320:
+        root.geometry("320x240")
+    else:
+        root.geometry("320x240+100+100")
     root.mainloop() 
 
 if __name__ == '__main__':

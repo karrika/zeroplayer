@@ -41,9 +41,13 @@ class ZeroPlayer(Frame):
             self.player = Player(args=('-xy', '800', '-geometry', '1100:100', '-noborder', '-ontop'))
         else:
             self.player = Player()
-        self.mp3_search = "/media/" + self.user + "/*/*/*/*.mp*"
+        if self.usbmusic_exists():
+            self.mp3_search = "/media/" + self.user + "/*/*/*/*.mp*"
+            self.m3u_dir    = "/media/" + self.user + "/MUSIC/"
+        else:
+            self.mp3_search = "/home/" + self.user + "/Music/*/*/*.mp*"
+            self.m3u_dir    = "/home/" + self.user + "/Music/"
         self.m3u_def    = "ALLTracks"
-        self.m3u_dir    = "/media/" + self.user + "/MUSIC/"
         self.mp4playing     = False
         self.volume         = 100
         self.stop_start     = 22
@@ -116,6 +120,10 @@ class ZeroPlayer(Frame):
             self.Create_Playlist()
         self.init_tunes()
         self.Show_Track()
+
+    def usbmusic_exists(self):
+        dirname = "/media/" + self.user + "/MUSIC/"
+        return os.path.exists(dirname)
        
     def change_start_button(self):
         if self.status == PLAYING and self.cmdbutton == IDLE:
@@ -356,6 +364,7 @@ class ZeroPlayer(Frame):
     def Play_track(self):
         if self.status == IDLE:
             return
+        print('karri ' + self.track)
         if os.path.exists(self.track):
             if 'mp3' in self.track or not RunningOnPi or UseOmxplayer == False:
                 self.player.stop()
